@@ -78,77 +78,71 @@ The discussion runs across five phases. Each phase has a defined goal, per-agent
 
 ### System Diagram
 
+```mermaid
+graph TD
+    subgraph Entry Points
+        MAIN["main.py / terminal_app.py<br/><i>Terminal UI</i>"]
+        BROWSER["browser_app.py<br/><i>FastAPI + SSE</i>"]
+    end
+
+    subgraph Core Engine
+        ORCH["FamilyDiscussionOrchestrator<br/><i>discussion/orchestrator.py</i><br/><br/>Phase state machine<br/>Speaker ordering<br/>Session management<br/>Auto-retry + recovery"]
+        PHASES["PhaseDefinitions<br/><i>discussion/phases.py</i><br/><br/>Phase 0-4 configs<br/>speaker_order, token_limit<br/>parent/child instructions"]
+        TRACKER["TokenTracker<br/><i>utils/token_tracker.py</i><br/><br/>Per-agent tallies<br/>Per-phase breakdown<br/>Cost calculation"]
+    end
+
+    subgraph Agent Layer
+        PHIL["Phil"]
+        CLAIRE["Claire"]
+        HALEY["Haley"]
+        ALEX["Alex"]
+        LUKE["Luke"]
+        MANNY["Manny"]
+        PERSONAS["family-prompts/*.md<br/><i>Identity + Relationships + Vacation Style</i>"]
+    end
+
+    subgraph LLM Backend
+        CLIENT["LLMClient<br/><i>utils/llm_client.py</i><br/><br/>Google ADK: LlmAgent, Runner,<br/>InMemorySessionService"]
+        GEMINI["Gemini 2.5 Flash<br/><i>Google API</i>"]
+        MOCK["Mock Mode<br/><i>No API needed</i>"]
+    end
+
+    MAIN --> ORCH
+    BROWSER --> ORCH
+    ORCH -->|"callbacks"| BROWSER
+    ORCH --> PHASES
+    ORCH --> TRACKER
+    ORCH --> PHIL & CLAIRE & HALEY & ALEX & LUKE & MANNY
+    PHIL & CLAIRE & HALEY & ALEX & LUKE & MANNY --> PERSONAS
+    ORCH --> CLIENT
+    CLIENT --> GEMINI
+    CLIENT --> MOCK
+
+    style PHIL fill:#adc6ff,color:#001a41
+    style CLAIRE fill:#ffb3b5,color:#680019
+    style HALEY fill:#f1c100,color:#241a00
+    style ALEX fill:#8b90a0,color:#131313
+    style LUKE fill:#ffb4ab,color:#690005
+    style MANNY fill:#4b8eff,color:#fff
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                          Entry Points                                   │
-│                                                                         │
-│   main.py / terminal_app.py          browser_app.py                     │
-│        (Terminal UI)               (FastAPI + SSE)                       │
-│             │                           │                               │
-│             └─────────┬─────────────────┘                               │
-│                       ▼                                                 │
-│         ┌──────────────────────────┐                                    │
-│         │  FamilyDiscussionOrchestrator  │◄── Callbacks ──► UI Layer    │
-│         │  (discussion/orchestrator.py)  │    on_message()              │
-│         │                          │    on_phase_change()              │
-│         │  • Phase state machine   │    on_discussion_complete()       │
-│         │  • Speaker ordering      │    on_metrics_update()            │
-│         │  • Session management    │    on_error()                     │
-│         │  • Auto-retry + recovery │                                    │
-│         └────────┬─────────────────┘                                    │
-│                  │                                                      │
-│         ┌────────▼─────────────────┐     ┌──────────────────────┐       │
-│         │    PhaseDefinitions      │     │    TokenTracker      │       │
-│         │  (discussion/phases.py)  │     │ (utils/token_tracker) │       │
-│         │                          │     │                      │       │
-│         │  Phase 0-4 configs:      │     │  Per-agent tallies   │       │
-│         │  • speaker_order         │     │  Per-phase breakdown  │       │
-│         │  • token_limit           │     │  Cost calculation     │       │
-│         │  • parent/child instrs   │     └──────────────────────┘       │
-│         └──────────────────────────┘                                    │
-│                                                                         │
-│         ┌──────────────────────────────────────────────────────┐        │
-│         │              Agent Wrappers (agents/*.py)            │        │
-│         │                                                      │        │
-│         │  ┌──────┐ ┌───────┐ ┌───────┐ ┌──────┐ ┌──────┐ ┌───────┐   │
-│         │  │ Phil │ │Claire │ │ Haley │ │ Alex │ │ Luke │ │ Manny │   │
-│         │  └──┬───┘ └──┬────┘ └──┬────┘ └──┬───┘ └──┬───┘ └──┬────┘   │
-│         │     │        │        │        │        │        │          │
-│         │     ▼        ▼        ▼        ▼        ▼        ▼          │
-│         │  ┌──────────────────────────────────────────────────┐        │
-│         │  │         family-prompts/*.md (Persona Files)      │        │
-│         │  │  Identity + Relationships + Vacation Style       │        │
-│         │  └──────────────────────────────────────────────────┘        │
-│         └──────────────────────────────────────────────────────┘        │
-│                                                                         │
-│         ┌──────────────────────────┐                                    │
-│         │      LLMClient          │                                    │
-│         │  (utils/llm_client.py)  │                                    │
-│         │                          │                                    │
-│         │  Google ADK:             │     ┌───────────────────┐          │
-│         │  • LlmAgent             │────▶│  Gemini 2.5 Flash │          │
-│         │  • Runner                │     │  (Google API)     │          │
-│         │  • InMemorySession       │     └───────────────────┘          │
-│         │                          │                                    │
-│         │  Mock mode (offline):    │     ┌───────────────────┐          │
-│         │  • Deterministic stubs   │────▶│  No API needed    │          │
-│         └──────────────────────────┘     └───────────────────┘          │
-└─────────────────────────────────────────────────────────────────────────┘
 
-  Discussion Flow:
-  ════════════════
+### Discussion Flow
 
-  Phase 0          Phase 1          Phase 2          Phase 3          Phase 4
-  "So Where?"  →  "Terrible Idea" → "What If..."  → "Just Agree?"  → "Decided!"
-                                                                        │
-  Phil ───┐       Phil ───┐        Phil ───┐       Luke ───┐       Claire ──┐
-  Claire ─┤       Claire ─┤        Claire ─┤       Manny ──┤       Phil ────┤
-  Haley ──┤       Haley ──┤        Haley ──┤       Haley ──┤       Haley ───┤
-  Alex ───┤       Alex ───┤        Alex ───┤       Alex ───┤       Alex ────┤
-  Luke ───┤       Luke ───┤        Luke ───┤       Claire ─┤       Luke ────┤
-  Manny ──┘       Manny ──┘        Manny ──┘       Phil ───┘       Manny ───┘
-                                                  (kids first)    (parents decide,
-                                                                   kids react)
+```mermaid
+graph LR
+    P0["Phase 0<br/><b>So Where Should<br/>We Go?</b><br/><br/>Phil → Claire →<br/>Haley → Alex →<br/>Luke → Manny"]
+    P1["Phase 1<br/><b>Wait, That's a<br/>Terrible Idea</b><br/><br/>Phil → Claire →<br/>Haley → Alex →<br/>Luke → Manny"]
+    P2["Phase 2<br/><b>Okay But<br/>What If...</b><br/><br/>Phil → Claire →<br/>Haley → Alex →<br/>Luke → Manny"]
+    P3["Phase 3<br/><b>Can We All<br/>Just Agree?</b><br/><br/>Luke → Manny →<br/>Haley → Alex →<br/>Claire → Phil<br/><i>kids first</i>"]
+    P4["Phase 4<br/><b>The Parents<br/>Have Decided</b><br/><br/>Claire → Phil →<br/>Haley → Alex →<br/>Luke → Manny<br/><i>parents decide,<br/>kids react</i>"]
+
+    P0 --> P1 --> P2 --> P3 --> P4
+
+    style P0 fill:#1c1b1b,stroke:#adc6ff,color:#e5e2e1
+    style P1 fill:#1c1b1b,stroke:#ffb3b5,color:#e5e2e1
+    style P2 fill:#1c1b1b,stroke:#f1c100,color:#e5e2e1
+    style P3 fill:#1c1b1b,stroke:#8b90a0,color:#e5e2e1
+    style P4 fill:#1c1b1b,stroke:#4b8eff,color:#e5e2e1
 ```
 
 ### File Structure
