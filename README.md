@@ -204,6 +204,8 @@ The browser interface is built on the **"Atmospheric Precision"** design system 
 - **Dual typography** — Inter for conversational copy, Space Grotesk for timestamps and metrics
 - **Token/cost dashboard** alongside the chat for live usage tracking
 
+![Mid-Discussion — Compromise Phase](docs/ui-mid-discussion.png)
+
 ![Completed Discussion — Token Metrics](docs/ui-complete.png)
 
 ---
@@ -260,4 +262,137 @@ Call flow:
 
 ---
 
-*AI Agents Bootcamp, Week 8 — Adapted from Experiment 1: Multi-Agent Debate*
+## Metaprompts
+
+### Claude Code
+
+```
+I need your help to build a simple Agentic project using Google ADK.
+
+Project:
+Create 6 Agents that are a family. There is a Husband Agent, a Wife Agent, and 4 Children Agents.
+
+Each agent should:
+- Suggest a good vacation destination based on their personality
+- Argue for their suggested destination
+- Discuss with other agents to develop a consensus
+- Collaboratively decide on a final vacation destination
+
+The task focuses on creating agents with distinct personalities that can negotiate and reach
+agreement through discussion.
+
+We have done a similar project in the past, and you can reference
+https://github.com/ashwinchidambaram/Multi-Agent-Debate to use as a foundation for this project.
+
+Please review the project requirements and propose to me a project plan for how you will build
+this, ensuring to use subagent driven development to parallelize workstreams. You can use
+Gemini Flash API calls for each Agent.
+```
+
+### Claude
+
+#### Persona Generation
+
+```
+I need your help to create 6 Persona prompts to use for some Agents.
+
+Let me give you the project details first so that you have context:
+
+Project:
+
+Create 6 Agents that are a family. There is a Husband Agent, a Wife Agent, and 4 Children Agents.
+
+Each agent should:
+- Suggest a good vacation destination based on their personality
+- Argue for their suggested destination
+- Discuss with other agents to develop a consensus
+- Collaboratively decide on a final vacation destination
+
+The task focuses on creating agents with distinct personalities that can negotiate and reach
+agreement through discussion.
+
+------
+
+I am thinking that I want to model these 6 Agents after Phil and Claire's family from Modern
+Family with an additional child. I'm thinking maybe we add Manny.
+
+Before you write the persona prompts, do you have any questions?
+```
+
+#### Stitch Prompt Generation
+
+```
+I am going to quickly build a web UI using Google Stitch.
+
+Can you write me a prompt optimized to generate a UI in Stitch?
+
+I am basically imagining the UI as a simple chat window (won't require User input or chats).
+Basically the UI allows the User to watch the Agents debate. I want it to look like a group chat
+or something like iMessage. I also want a box off to the side where it lists all 6 agents with
+token count and cost tracking.
+
+Let me know if you have any questions.
+```
+
+### Stitch
+
+```
+Build a read-only group chat debate viewer. No user input. No send button. The UI has two panels
+side by side.
+
+— LEFT PANEL (chat window, ~70% width) —
+
+Style it like an iMessage group chat. Dark mode. Each message is a chat bubble. Bubbles from
+different speakers are left-aligned with their avatar and name above. No right-aligned bubbles —
+all agents are "others", not the user.
+
+Each bubble should have:
+- A circular avatar with the character's initials (2 letters) in a unique color per character
+- The character's name in small text above the bubble
+- The message text inside a rounded chat bubble (dark gray background, white text)
+- A small timestamp below the bubble
+
+Use these 6 characters and assign each a distinct avatar color:
+- Phil Dunphy → blue
+- Claire Dunphy → pink
+- Haley Dunphy → amber/orange
+- Alex Dunphy → green
+- Luke Dunphy → coral/red
+- Manny Delgado → purple
+
+At the top of the chat panel, show a group chat header bar with a "Dunphy Family Vacation Debate"
+title, a small group icon, and a subtle "6 participants" label.
+
+At the bottom of the chat panel, show a slim status bar (not an input) that displays a pulsing
+green dot and the text "Debate in progress…" to indicate the agents are live.
+
+Populate the chat with 6–8 sample messages showing the characters debating vacation destinations
+in their distinct voices. Make the messages feel natural and funny.
+
+— RIGHT PANEL (agent sidebar, ~30% width) —
+
+A vertical card panel titled "Agents". List all 6 agents. For each agent show:
+- Their circular avatar (same color as in the chat)
+- Their name
+- A "Tokens used" count (e.g. 1,240)
+- A "Cost" value in USD (e.g. $0.0018)
+
+Below the agent list, show a divider and a summary row:
+- "Total tokens" with a combined count
+- "Total cost" with a combined USD value
+- A subtle "Estimated at $3 / 1M tokens" pricing note in small muted text
+
+The sidebar should feel like a lightweight analytics panel — clean, minimal, monospaced numbers,
+muted labels.
+
+— OVERALL STYLE —
+
+Dark mode throughout. Tight, modern, no unnecessary chrome. The chat panel should feel like a
+real messaging app. The sidebar should feel like a dev tool or dashboard widget sitting next to
+it. Use a very dark background (#0d0d0d or similar) with slightly lighter surface cards. Subtle
+borders. No gradients. No shadows. Rounded corners on bubbles and cards.
+```
+
+---
+
+*AI Agents Bootcamp, Week 8 — Adapted from [Experiment 1: Multi-Agent Debate](https://github.com/ashwinchidambaram/Multi-Agent-Debate)*

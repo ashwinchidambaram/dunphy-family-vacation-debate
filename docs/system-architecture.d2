@@ -5,95 +5,64 @@ title: {
   near: top-center
   shape: text
   style: {
-    font-size: 28
+    font-size: 32
     bold: true
     font-color: "#e5e2e1"
   }
 }
 
+# --- Entry Points ---
 entry: Entry Points {
   style: {
     fill: "#1c1b1b"
     stroke: "#414755"
     border-radius: 12
     font-color: "#e5e2e1"
+    font-size: 18
   }
 
-  terminal: "main.py / terminal_app.py\n(Terminal UI)" {
+  terminal: "Terminal UI\nmain.py / terminal_app.py" {
     style: {
       fill: "#353534"
       stroke: "#8b90a0"
       border-radius: 8
       font-color: "#e5e2e1"
+      font-size: 16
     }
   }
 
-  browser: "browser_app.py\n(FastAPI + SSE)" {
+  browser: "Browser UI\nbrowser_app.py (FastAPI + SSE)" {
     style: {
       fill: "#353534"
       stroke: "#8b90a0"
       border-radius: 8
       font-color: "#e5e2e1"
+      font-size: 16
     }
   }
 }
 
-orchestrator: "FamilyDiscussionOrchestrator\ndiscussion/orchestrator.py" {
+# --- Orchestrator ---
+orchestrator: "Orchestrator\ndiscussion/orchestrator.py" {
   style: {
     fill: "#201f1f"
     stroke: "#adc6ff"
     border-radius: 12
     font-color: "#e5e2e1"
-    stroke-width: 2
-  }
-
-  features: |md
-    - Phase state machine
-    - Per-phase speaker ordering
-    - Session ID guards
-    - Auto-retry + manual recovery
-    - Output sanitization
-  | {
-    style: {
-      font-color: "#c1c6d7"
-      font-size: 13
-    }
+    stroke-width: 3
+    font-size: 18
   }
 }
 
-config: Configuration {
+# --- Agents (horizontal row) ---
+agents: Family Agents {
+  grid-columns: 6
   style: {
     fill: "#1c1b1b"
     stroke: "#414755"
     border-radius: 12
     font-color: "#e5e2e1"
-  }
-
-  phases: "PhaseDefinitions\ndiscussion/phases.py\n\nPhase 0–4 configs\nspeaker_order\ntoken_limit\nparent/child instructions" {
-    style: {
-      fill: "#353534"
-      stroke: "#f1c100"
-      border-radius: 8
-      font-color: "#e5e2e1"
-    }
-  }
-
-  tracker: "TokenTracker\nutils/token_tracker.py\n\nPer-agent tallies\nPer-phase breakdown\nCost calculation" {
-    style: {
-      fill: "#353534"
-      stroke: "#8b90a0"
-      border-radius: 8
-      font-color: "#e5e2e1"
-    }
-  }
-}
-
-agents: Agent Wrappers {
-  style: {
-    fill: "#1c1b1b"
-    stroke: "#414755"
-    border-radius: 12
-    font-color: "#e5e2e1"
+    font-size: 18
   }
 
   phil: Phil {
@@ -103,6 +72,7 @@ agents: Agent Wrappers {
       border-radius: 8
       font-color: "#001a41"
       bold: true
+      font-size: 16
     }
   }
 
@@ -113,6 +83,7 @@ agents: Agent Wrappers {
       border-radius: 8
       font-color: "#680019"
       bold: true
+      font-size: 16
     }
   }
 
@@ -123,6 +94,7 @@ agents: Agent Wrappers {
       border-radius: 8
       font-color: "#241a00"
       bold: true
+      font-size: 16
     }
   }
 
@@ -133,6 +105,7 @@ agents: Agent Wrappers {
       border-radius: 8
       font-color: "#131313"
       bold: true
+      font-size: 16
     }
   }
 
@@ -143,6 +116,7 @@ agents: Agent Wrappers {
       border-radius: 8
       font-color: "#690005"
       bold: true
+      font-size: 16
     }
   }
 
@@ -153,107 +127,113 @@ agents: Agent Wrappers {
       border-radius: 8
       font-color: "#ffffff"
       bold: true
+      font-size: 16
     }
   }
 }
 
-personas: "family-prompts/*.md\nIdentity + Relationships + Vacation Style" {
+# --- Side nodes ---
+personas: "Persona Files\nfamily-prompts/*.md" {
   style: {
     fill: "#353534"
     stroke: "#414755"
     border-radius: 8
     font-color: "#c1c6d7"
-    font-size: 14
+    font-size: 16
   }
 }
 
+config: "Configuration" {
+  style: {
+    fill: "#1c1b1b"
+    stroke: "#414755"
+    border-radius: 12
+    font-color: "#e5e2e1"
+    font-size: 18
+  }
+
+  phases: "Phase Definitions\ndiscussion/phases.py" {
+    style: {
+      fill: "#353534"
+      stroke: "#f1c100"
+      border-radius: 8
+      font-color: "#e5e2e1"
+      font-size: 16
+    }
+  }
+
+  tracker: "Token Tracker\nutils/token_tracker.py" {
+    style: {
+      fill: "#353534"
+      stroke: "#8b90a0"
+      border-radius: 8
+      font-color: "#e5e2e1"
+      font-size: 16
+    }
+  }
+}
+
+# --- LLM Backend ---
 llm: LLM Backend {
   style: {
     fill: "#1c1b1b"
     stroke: "#414755"
     border-radius: 12
     font-color: "#e5e2e1"
+    font-size: 18
   }
 
-  client: "LLMClient\nutils/llm_client.py\n\nGoogle ADK\nLlmAgent + Runner\nInMemorySessionService" {
+  client: "LLM Client\nutils/llm_client.py" {
     style: {
       fill: "#353534"
       stroke: "#4b8eff"
       border-radius: 8
       font-color: "#e5e2e1"
+      font-size: 16
     }
   }
 
-  gemini: "Gemini 2.5 Flash\n(Google API)" {
+  gemini: "Gemini 2.5 Flash" {
     style: {
       fill: "#4b8eff"
       stroke: "#4b8eff"
       border-radius: 8
       font-color: "#ffffff"
       bold: true
+      font-size: 16
     }
   }
 
-  mock: "Mock Mode\n(No API needed)" {
+  mock: "Mock Mode" {
     style: {
       fill: "#353534"
       stroke: "#8b90a0"
       border-radius: 8
       font-color: "#8b90a0"
       stroke-dash: 5
+      font-size: 16
     }
   }
 }
 
-# Connections
-entry.terminal -> orchestrator: {
+# --- Vertical flow connections ---
+entry -> orchestrator: {
   style: {
     stroke: "#8b90a0"
-  }
-}
-
-entry.browser -> orchestrator: {
-  style: {
-    stroke: "#8b90a0"
-  }
-}
-
-orchestrator -> entry.browser: "callbacks\non_message()\non_phase_change()\non_metrics_update()" {
-  style: {
-    stroke: "#adc6ff"
-    stroke-dash: 3
-    font-color: "#8b90a0"
-    font-size: 11
-  }
-}
-
-orchestrator -> config.phases: {
-  style: {
-    stroke: "#f1c100"
-  }
-}
-
-orchestrator -> config.tracker: {
-  style: {
-    stroke: "#8b90a0"
-  }
-}
-
-orchestrator -> agents: {
-  style: {
-    stroke: "#adc6ff"
     stroke-width: 2
   }
 }
 
-agents.phil -> personas: {style: {stroke: "#adc6ff"}}
-agents.claire -> personas: {style: {stroke: "#ffb3b5"}}
-agents.haley -> personas: {style: {stroke: "#f1c100"}}
-agents.alex -> personas: {style: {stroke: "#8b90a0"}}
-agents.luke -> personas: {style: {stroke: "#ffb4ab"}}
-agents.manny -> personas: {style: {stroke: "#4b8eff"}}
+orchestrator -> agents: "dispatches turns" {
+  style: {
+    stroke: "#adc6ff"
+    stroke-width: 2
+    font-color: "#8b90a0"
+    font-size: 14
+  }
+}
 
-orchestrator -> llm.client: {
+agents -> llm.client: {
   style: {
     stroke: "#4b8eff"
     stroke-width: 2
@@ -270,5 +250,32 @@ llm.client -> llm.mock: {
   style: {
     stroke: "#8b90a0"
     stroke-dash: 5
+  }
+}
+
+# --- Lateral connections ---
+orchestrator -> config: "reads phases & tracks tokens" {
+  style: {
+    stroke: "#f1c100"
+    font-color: "#8b90a0"
+    font-size: 14
+  }
+}
+
+agents -> personas: "loads persona at runtime" {
+  style: {
+    stroke: "#414755"
+    font-color: "#8b90a0"
+    font-size: 14
+  }
+}
+
+# --- Callback connection ---
+orchestrator -> entry.browser: "SSE callbacks" {
+  style: {
+    stroke: "#adc6ff"
+    stroke-dash: 3
+    font-color: "#8b90a0"
+    font-size: 14
   }
 }
