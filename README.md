@@ -1,8 +1,10 @@
 # Dunphy Family Vacation Debate
 
-Multi-agent simulation where six Modern Family characters debate a single question — **"Where should the Dunphy family go on vacation?"** — across five structured phases, powered by Google ADK and Gemini 2.0 Flash.
+Multi-agent simulation where six Modern Family characters debate a single question — **"Where should the Dunphy family go on vacation?"** — across five structured phases, powered by Google ADK and Gemini 2.5 Flash.
 
 Built for the AI Agents Bootcamp, Week 8 class assignment. Adapted from Experiment 1 — Multi-Agent Debate.
+
+![Discussion UI — Phase 0 Opening](docs/ui-overview.png)
 
 ---
 
@@ -78,72 +80,11 @@ The discussion runs across five phases. Each phase has a defined goal, per-agent
 
 ### System Diagram
 
-```mermaid
-graph TD
-    subgraph Entry Points
-        MAIN["main.py / terminal_app.py<br/><i>Terminal UI</i>"]
-        BROWSER["browser_app.py<br/><i>FastAPI + SSE</i>"]
-    end
-
-    subgraph Core Engine
-        ORCH["FamilyDiscussionOrchestrator<br/><i>discussion/orchestrator.py</i><br/><br/>Phase state machine<br/>Speaker ordering<br/>Session management<br/>Auto-retry + recovery"]
-        PHASES["PhaseDefinitions<br/><i>discussion/phases.py</i><br/><br/>Phase 0-4 configs<br/>speaker_order, token_limit<br/>parent/child instructions"]
-        TRACKER["TokenTracker<br/><i>utils/token_tracker.py</i><br/><br/>Per-agent tallies<br/>Per-phase breakdown<br/>Cost calculation"]
-    end
-
-    subgraph Agent Layer
-        PHIL["Phil"]
-        CLAIRE["Claire"]
-        HALEY["Haley"]
-        ALEX["Alex"]
-        LUKE["Luke"]
-        MANNY["Manny"]
-        PERSONAS["family-prompts/*.md<br/><i>Identity + Relationships + Vacation Style</i>"]
-    end
-
-    subgraph LLM Backend
-        CLIENT["LLMClient<br/><i>utils/llm_client.py</i><br/><br/>Google ADK: LlmAgent, Runner,<br/>InMemorySessionService"]
-        GEMINI["Gemini 2.5 Flash<br/><i>Google API</i>"]
-        MOCK["Mock Mode<br/><i>No API needed</i>"]
-    end
-
-    MAIN --> ORCH
-    BROWSER --> ORCH
-    ORCH -->|"callbacks"| BROWSER
-    ORCH --> PHASES
-    ORCH --> TRACKER
-    ORCH --> PHIL & CLAIRE & HALEY & ALEX & LUKE & MANNY
-    PHIL & CLAIRE & HALEY & ALEX & LUKE & MANNY --> PERSONAS
-    ORCH --> CLIENT
-    CLIENT --> GEMINI
-    CLIENT --> MOCK
-
-    style PHIL fill:#adc6ff,color:#001a41
-    style CLAIRE fill:#ffb3b5,color:#680019
-    style HALEY fill:#f1c100,color:#241a00
-    style ALEX fill:#8b90a0,color:#131313
-    style LUKE fill:#ffb4ab,color:#690005
-    style MANNY fill:#4b8eff,color:#fff
-```
+![System Architecture](docs/system-architecture.svg)
 
 ### Discussion Flow
 
-```mermaid
-graph LR
-    P0["Phase 0<br/><b>So Where Should<br/>We Go?</b><br/><br/>Phil → Claire →<br/>Haley → Alex →<br/>Luke → Manny"]
-    P1["Phase 1<br/><b>Wait, That's a<br/>Terrible Idea</b><br/><br/>Phil → Claire →<br/>Haley → Alex →<br/>Luke → Manny"]
-    P2["Phase 2<br/><b>Okay But<br/>What If...</b><br/><br/>Phil → Claire →<br/>Haley → Alex →<br/>Luke → Manny"]
-    P3["Phase 3<br/><b>Can We All<br/>Just Agree?</b><br/><br/>Luke → Manny →<br/>Haley → Alex →<br/>Claire → Phil<br/><i>kids first</i>"]
-    P4["Phase 4<br/><b>The Parents<br/>Have Decided</b><br/><br/>Claire → Phil →<br/>Haley → Alex →<br/>Luke → Manny<br/><i>parents decide,<br/>kids react</i>"]
-
-    P0 --> P1 --> P2 --> P3 --> P4
-
-    style P0 fill:#1c1b1b,stroke:#adc6ff,color:#e5e2e1
-    style P1 fill:#1c1b1b,stroke:#ffb3b5,color:#e5e2e1
-    style P2 fill:#1c1b1b,stroke:#f1c100,color:#e5e2e1
-    style P3 fill:#1c1b1b,stroke:#8b90a0,color:#e5e2e1
-    style P4 fill:#1c1b1b,stroke:#4b8eff,color:#e5e2e1
-```
+![Discussion Flow](docs/discussion-flow.svg)
 
 ### File Structure
 
@@ -262,6 +203,8 @@ The browser interface is built on the **"Atmospheric Precision"** design system 
 - **Per-character color coding** — each family member's messages appear in their assigned color, so the conversation reads like a group chat where you always know who is talking
 - **Dual typography** — Inter for conversational copy, Space Grotesk for timestamps and metrics
 - **Token/cost dashboard** alongside the chat for live usage tracking
+
+![Completed Discussion — Token Metrics](docs/ui-complete.png)
 
 ---
 
