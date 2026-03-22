@@ -51,7 +51,7 @@ def _wire_callbacks() -> None:
     orchestrator.on_failure_options = lambda _agent: _push_event(
         "paused", {"paused": True, "hint": "Use retry/skip controls"}
     )
-    orchestrator.on_metrics = lambda metrics: _push_event("metrics", metrics)
+    orchestrator.on_metrics_update = lambda metrics: _push_event("metrics", metrics)
 
 
 _wire_callbacks()
@@ -153,18 +153,6 @@ def index() -> str:
 <div class="flex items-center gap-3 bg-[#4b8eff] text-white rounded-lg p-3 Active: translate-x-1 duration-200 cursor-pointer">
 <span class="material-symbols-outlined">forum</span>
 <span class="font-['Space_Grotesk'] text-sm tracking-widest uppercase">Live Chat</span>
-</div>
-<div class="flex items-center gap-3 text-[#8b90a0] p-3 hover:bg-[#353534] transition-all cursor-pointer">
-<span class="material-symbols-outlined">analytics</span>
-<span class="font-['Space_Grotesk'] text-sm tracking-widest uppercase">Agent Metrics</span>
-</div>
-<div class="flex items-center gap-3 text-[#8b90a0] p-3 hover:bg-[#353534] transition-all cursor-pointer">
-<span class="material-symbols-outlined">toll</span>
-<span class="font-['Space_Grotesk'] text-sm tracking-widest uppercase">Token Usage</span>
-</div>
-<div class="flex items-center gap-3 text-[#8b90a0] p-3 hover:bg-[#353534] transition-all cursor-pointer">
-<span class="material-symbols-outlined">terminal</span>
-<span class="font-['Space_Grotesk'] text-sm tracking-widest uppercase">System Logs</span>
 </div>
 </nav>
 <div class="p-4 mt-auto">
@@ -413,22 +401,19 @@ function addError(text) {
 
 function updateMetrics(payload) {
     const agents = payload.agents || {};
-    let totalTokens = 0;
-    let totalCost = 0;
     for (const [name, data] of Object.entries(agents)) {
         const tokens = data.total_tokens || 0;
-        const cost = data.total_cost || 0;
-        totalTokens += tokens;
-        totalCost += cost;
+        const cost = data.cost_usd || 0;
         const tokEl = document.getElementById('tokens-' + name);
         const costEl = document.getElementById('cost-' + name);
         if (tokEl) tokEl.textContent = tokens.toLocaleString();
-        if (costEl) costEl.textContent = '$' + cost.toFixed(6);
+        if (costEl) costEl.textContent = data.cost_display || ('$' + cost.toFixed(6));
     }
-    if (payload.total_tokens !== undefined) totalTokens = payload.total_tokens;
-    if (payload.total_cost !== undefined) totalCost = payload.total_cost;
+    const summary = payload.summary || {};
+    const totalTokens = summary.total_tokens || 0;
+    const totalCost = summary.cost_usd || 0;
     document.getElementById('total-tokens').textContent = totalTokens.toLocaleString();
-    document.getElementById('total-cost').textContent = '$' + totalCost.toFixed(6);
+    document.getElementById('total-cost').textContent = summary.cost_display || ('$' + totalCost.toFixed(6));
 }
 
 function renderEvent(e) {
