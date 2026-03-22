@@ -20,7 +20,7 @@ class LLMClientError(RuntimeError):
 @dataclass
 class LLMConfig:
     backend: str
-    gemini_model: str = "gemini-2.0-flash"
+    gemini_model: str = "gemini-2.5-flash"
     timeout_seconds: float = 60.0
 
 
