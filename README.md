@@ -2,7 +2,7 @@
 
 Multi-agent simulation where six Modern Family characters debate a single question — **"Where should the Dunphy family go on vacation?"** — across five structured phases, powered by Google ADK and Gemini 2.5 Flash.
 
-Built for the AI Agents Bootcamp, Week 8 class assignment. Adapted from Experiment 1 — Multi-Agent Debate.
+Built for the AI Agents Bootcamp, Week 8 class assignment. Adapted from Experiment 1 — Multi-Agent Debate (Ref: https://github.com/ashwinchidambaram/Multi-Agent-Debate).
 
 ![Discussion UI — Phase 0 Opening](docs/ui-overview.png)
 
