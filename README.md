@@ -76,6 +76,83 @@ The discussion runs across five phases. Each phase has a defined goal, per-agent
 
 ## Architecture
 
+### System Diagram
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          Entry Points                                   │
+│                                                                         │
+│   main.py / terminal_app.py          browser_app.py                     │
+│        (Terminal UI)               (FastAPI + SSE)                       │
+│             │                           │                               │
+│             └─────────┬─────────────────┘                               │
+│                       ▼                                                 │
+│         ┌──────────────────────────┐                                    │
+│         │  FamilyDiscussionOrchestrator  │◄── Callbacks ──► UI Layer    │
+│         │  (discussion/orchestrator.py)  │    on_message()              │
+│         │                          │    on_phase_change()              │
+│         │  • Phase state machine   │    on_discussion_complete()       │
+│         │  • Speaker ordering      │    on_metrics_update()            │
+│         │  • Session management    │    on_error()                     │
+│         │  • Auto-retry + recovery │                                    │
+│         └────────┬─────────────────┘                                    │
+│                  │                                                      │
+│         ┌────────▼─────────────────┐     ┌──────────────────────┐       │
+│         │    PhaseDefinitions      │     │    TokenTracker      │       │
+│         │  (discussion/phases.py)  │     │ (utils/token_tracker) │       │
+│         │                          │     │                      │       │
+│         │  Phase 0-4 configs:      │     │  Per-agent tallies   │       │
+│         │  • speaker_order         │     │  Per-phase breakdown  │       │
+│         │  • token_limit           │     │  Cost calculation     │       │
+│         │  • parent/child instrs   │     └──────────────────────┘       │
+│         └──────────────────────────┘                                    │
+│                                                                         │
+│         ┌──────────────────────────────────────────────────────┐        │
+│         │              Agent Wrappers (agents/*.py)            │        │
+│         │                                                      │        │
+│         │  ┌──────┐ ┌───────┐ ┌───────┐ ┌──────┐ ┌──────┐ ┌───────┐   │
+│         │  │ Phil │ │Claire │ │ Haley │ │ Alex │ │ Luke │ │ Manny │   │
+│         │  └──┬───┘ └──┬────┘ └──┬────┘ └──┬───┘ └──┬───┘ └──┬────┘   │
+│         │     │        │        │        │        │        │          │
+│         │     ▼        ▼        ▼        ▼        ▼        ▼          │
+│         │  ┌──────────────────────────────────────────────────┐        │
+│         │  │         family-prompts/*.md (Persona Files)      │        │
+│         │  │  Identity + Relationships + Vacation Style       │        │
+│         │  └──────────────────────────────────────────────────┘        │
+│         └──────────────────────────────────────────────────────┘        │
+│                                                                         │
+│         ┌──────────────────────────┐                                    │
+│         │      LLMClient          │                                    │
+│         │  (utils/llm_client.py)  │                                    │
+│         │                          │                                    │
+│         │  Google ADK:             │     ┌───────────────────┐          │
+│         │  • LlmAgent             │────▶│  Gemini 2.5 Flash │          │
+│         │  • Runner                │     │  (Google API)     │          │
+│         │  • InMemorySession       │     └───────────────────┘          │
+│         │                          │                                    │
+│         │  Mock mode (offline):    │     ┌───────────────────┐          │
+│         │  • Deterministic stubs   │────▶│  No API needed    │          │
+│         └──────────────────────────┘     └───────────────────┘          │
+└─────────────────────────────────────────────────────────────────────────┘
+
+  Discussion Flow:
+  ════════════════
+
+  Phase 0          Phase 1          Phase 2          Phase 3          Phase 4
+  "So Where?"  →  "Terrible Idea" → "What If..."  → "Just Agree?"  → "Decided!"
+                                                                        │
+  Phil ───┐       Phil ───┐        Phil ───┐       Luke ───┐       Claire ──┐
+  Claire ─┤       Claire ─┤        Claire ─┤       Manny ──┤       Phil ────┤
+  Haley ──┤       Haley ──┤        Haley ──┤       Haley ──┤       Haley ───┤
+  Alex ───┤       Alex ───┤        Alex ───┤       Alex ───┤       Alex ────┤
+  Luke ───┤       Luke ───┤        Luke ───┤       Claire ─┤       Luke ────┤
+  Manny ──┘       Manny ──┘        Manny ──┘       Phil ───┘       Manny ───┘
+                                                  (kids first)    (parents decide,
+                                                                   kids react)
+```
+
+### File Structure
+
 ```
 Week 8 - Class Assignment/
 ├── main.py                     # Terminal entrypoint — loads .env, delegates to terminal_app
@@ -115,7 +192,7 @@ Week 8 - Class Assignment/
 
 **`discussion/phases.py`** — Five `PhaseDefinition` dataclasses. Each carries the phase name, goal, token limit, speaker order, and — for Phase 4 only — separate `parent_instruction` and `child_instruction` strings so parents and kids receive fundamentally different prompts in the same phase.
 
-**`utils/llm_client.py`** — ADK integration. Creates a fresh `LlmAgent` per turn with `gemini-2.0-flash`, runs it through an `InMemorySessionService` via `Runner`, and returns normalized `text`, `input_tokens`, `output_tokens`. `mock` mode returns deterministic offline responses — no API key required, useful for UI verification.
+**`utils/llm_client.py`** — ADK integration. Creates a fresh `LlmAgent` per turn with `gemini-2.5-flash`, runs it through an `InMemorySessionService` via `Runner`, and returns normalized `text`, `input_tokens`, `output_tokens`. `mock` mode returns deterministic offline responses — no API key required, useful for UI verification.
 
 ---
 
